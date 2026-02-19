@@ -13,7 +13,7 @@
 # limitations under the License.
 
 type: mcp_server
-version: v4.6.0
+version: v4.7.0
 data:
   id: bd9ee30f-f559-4944-8ce4-9a8e768ef7e1
   name: JRW7Z45NLWJHBTDYMCPServer

@@ -1,5 +1,5 @@
 type: mcp_server
-version: v4.6.0
+version: v4.7.0
 data:
   id: test-mcp-server-id
   name: TestMCPServer
