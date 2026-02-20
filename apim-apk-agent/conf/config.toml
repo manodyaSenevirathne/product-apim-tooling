@@ -6,6 +6,7 @@
   environmentLabels = ["Default"]
   skipSSLVerification = true
   internalKeyIssuer = "http://am.wso2.com:443/token"
+  internalKeySecret = "apim-apk-issuer-cert"
   [controlPlane.brokerConnectionParameters]
   eventListeningEndpoints = ["amqp://admin:admin@wso2apim:5672?retries='10'&connectdelay='30'"]
 

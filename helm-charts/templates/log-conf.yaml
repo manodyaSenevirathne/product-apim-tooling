@@ -21,6 +21,7 @@ data:
       environmentLabels = ["{{ .Values.controlPlane.environmentLabels }}"]
       skipSSLVerification = {{ .Values.controlPlane.skipSSLVerification }}
       internalKeyIssuer = "{{ .Values.controlPlane.internalKeyIssuer | default "http://am.wso2.com:443/token" }}"
+      internalKeySecret = "{{ .Values.controlPlane.internalKeySecret | default "apim-apk-issuer-cert" }}"
       {{- if .Values.controlPlane.secretName }}
       [controlPlane.brokerConnectionParameters]
       eventListeningEndpoints = ["$env{AMQP_URL}"]

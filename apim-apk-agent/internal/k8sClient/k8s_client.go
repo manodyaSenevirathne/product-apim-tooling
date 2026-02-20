@@ -714,7 +714,7 @@ func CreateAndUpdateTokenIssuersCR(keyManager eventhubTypes.ResolvedKeyManager, 
 			SignatureValidation: &dpv1alpha2.SignatureValidation{
 				Certificate: &dpv1alpha2.CERTConfig{
 					SecretRef: &dpv1alpha2.RefConfig{
-						Name: constants.InternalKeySecretName,
+						Name: conf.ControlPlane.InternalKeySecret,
 						Key:  constants.InternalKeySecretKey,
 					},
 				},

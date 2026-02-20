@@ -111,6 +111,7 @@ type controlPlane struct {
 	HTTPClient                 httpClient
 	RequestWorkerPool          requestWorkerPool
 	InternalKeyIssuer          string
+	InternalKeySecret          string
 	ClientID                   string
 	ClientSecret               string
 	Provider                   string

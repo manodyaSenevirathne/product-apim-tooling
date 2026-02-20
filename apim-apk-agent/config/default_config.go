@@ -45,6 +45,7 @@ var defaultConfig = &Config{
 			PauseTimeAfterFailure: 5,
 		},
 		InternalKeyIssuer: "http://am.wso2.com:443/token",
+		InternalKeySecret: "apim-apk-issuer-cert",
 		Provider:          "admin",
 	},
 	Agent: agent{
