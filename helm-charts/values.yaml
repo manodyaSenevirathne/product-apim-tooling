@@ -52,6 +52,7 @@ agent:
 certmanager:
   enabled: false
   enableClusterIssuer: true
+  enableCertificateCreation: true
 serviceAccount:
   enableServiceAccountCreation: true
   enableClusterRoleCreation: true

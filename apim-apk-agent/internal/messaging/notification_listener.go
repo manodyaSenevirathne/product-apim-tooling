@@ -90,7 +90,7 @@ func handleNotification(c client.Client) {
 			continue
 		}
 		logger.LoggerMessaging.Infof("Event %s is received", notification.Event.PayloadData.EventType)
-		logger.LoggerMessaging.Infof("Event %s is received with payload %s", notification.Event.PayloadData.EventType, notification.Event.PayloadData.Event)
+		logger.LoggerMessaging.Debugf("Event %s is received with payload %s", notification.Event.PayloadData.EventType, notification.Event.PayloadData.Event)
 		err := processNotificationEvent(conf, &notification, c)
 		if err != nil {
 			continue
