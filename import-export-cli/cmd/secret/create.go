@@ -112,7 +112,11 @@ func initSecretInformation(keyStoreConfig *utils.KeyStoreConfig, encryptionKeyCo
 		Algorithm:  encryptionAlgorithm,
 	}
 	if utils.IsAES256Encryption(secretConfig.Algorithm) {
-		secretConfig.EncryptionKey = utils.GetStoredEncryptionKey(encryptionKeyConfig)
+		encryptionKey, err := utils.GetStoredEncryptionKey(encryptionKeyConfig)
+		if err != nil {
+			utils.HandleErrorAndExit("Invalid stored encryption key.", err)
+		}
+		secretConfig.EncryptionKey = encryptionKey
 	}
 	if isNonEmptyString(inputPropertiesfile) {
 		secretConfig.InputType = "file"

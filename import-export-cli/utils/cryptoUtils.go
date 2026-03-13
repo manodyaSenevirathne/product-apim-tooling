@@ -106,18 +106,18 @@ func Decrypt(key []byte, cryptoText string) string {
 func ResolveAES256Key(encryptionKey string) ([]byte, error) {
 	trimmedKey := strings.TrimSpace(encryptionKey)
 	if trimmedKey == "" {
-		return nil, errors.New("encryption key cannot be empty")
+		return nil, errors.New("Encryption key cannot be empty")
 	}
 	if isHexAES256Key(trimmedKey) {
 		keyBytes, err := hex.DecodeString(trimmedKey)
 		if err != nil {
-			return nil, errors.New("invalid hexadecimal characters found in encryption key")
+			return nil, errors.New("Invalid hexadecimal characters found in encryption key")
 		}
 		return keyBytes, nil
 	}
 	keyBytes := []byte(trimmedKey)
 	if len(keyBytes) != AES256KeySize {
-		return nil, fmt.Errorf("invalid AES key length: %d bytes. AES-256 requires a 32-byte (256-bit) key", len(keyBytes))
+		return nil, fmt.Errorf("Invalid AES key length: %d bytes. AES-256 requires a 32-byte (256-bit) key", len(keyBytes))
 	}
 	return keyBytes, nil
 }

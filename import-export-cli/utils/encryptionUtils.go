@@ -97,15 +97,18 @@ func IsValidSymmetricEncryptionConfig(config *EncryptionKeyConfig) bool {
 }
 
 // GetStoredEncryptionKey returns the decoded symmetric encryption key from the config.
-func GetStoredEncryptionKey(config *EncryptionKeyConfig) string {
+func GetStoredEncryptionKey(config *EncryptionKeyConfig) (string, error) {
 	if config == nil || !IsNonEmptyString(config.EncryptionKey) {
-		return ""
+		return "", errors.New("Stored encryption key is empty")
 	}
 	encryptionKey, err := base64.StdEncoding.DecodeString(config.EncryptionKey)
 	if err != nil {
-		return ""
+		return "", err
 	}
-	return string(encryptionKey)
+	if !IsNonEmptyString(string(encryptionKey)) {
+		return "", errors.New("Stored encryption key is empty")
+	}
+	return string(encryptionKey), nil
 }
 
 // EncryptSecrets encrypts the secrets using the keystore or a direct encryption key and writes them to a file or console depending on the config map argument
