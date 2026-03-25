@@ -22,6 +22,8 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/wso2/product-apim-tooling/import-export-cli/integration/base"
+
 	"github.com/wso2/product-apim-tooling/import-export-cli/integration/testutils"
 
 	"github.com/wso2/product-apim-tooling/import-export-cli/integration/apim"
@@ -713,7 +715,9 @@ func TestExportImportApiProductCrossTenantUserWithUpdateApisAndApiProduct(t *tes
 }
 
 // Export an API Product with its dependent APIs from one environment as super tenant user with Internal/devops role
-//  and import to another environment freshly as tenant admin and try to update that API Product and dependent APIs.
+//
+//	and import to another environment freshly as tenant admin and try to update that API Product and dependent APIs.
+//
 // This same command can be used to update only the dependent APIs as well.
 func TestExportImportApiProductCrossTenantDevopsWithUpdateApisAndApiProduct(t *testing.T) {
 	devopsUser := testutils.Credentials{Username: devops.UserName, Password: devops.Password}
@@ -1271,12 +1275,15 @@ func TestDeleteApiProductWithActiveSubscriptionsSuperTenantUser(t *testing.T) {
 	//Change life cycle state of Api Product from CREATED to PUBLISHED
 	testutils.PublishAPIProduct(dev, apiPublisher, apiPublisherPassword, apiProduct.ID)
 
-	// Create an app and subscribe to the API Product directly via REST API to create an active subscription
-	app := testutils.AddApp(t, dev, apiSubscriber, apiSubscriberPassword)
-	testutils.AddSubscription(t, dev, apiProduct.ID, app.ApplicationID, testutils.UnlimitedPolicy,
-		apiSubscriber, apiSubscriberPassword)
+	args := &testutils.ApiGetKeyTestArgs{
+		CtlUser:    testutils.Credentials{Username: adminUsername, Password: adminPassword},
+		ApiProduct: apiProduct,
+		Apim:       dev,
+	}
+	base.WaitForIndexing()
 
-	dev.Login(adminUsername, adminPassword)
+	//Get keys for ApiProduct and keep subscription active
+	testutils.ValidateGetKeysWithoutCleanup(t, args, false)
 
 	argsToDelete := &testutils.ApiProductImportExportTestArgs{
 		CtlUser:    testutils.Credentials{Username: adminUsername, Password: adminPassword},
