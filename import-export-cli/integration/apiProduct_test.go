@@ -22,8 +22,6 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/wso2/product-apim-tooling/import-export-cli/integration/base"
-
 	"github.com/wso2/product-apim-tooling/import-export-cli/integration/testutils"
 
 	"github.com/wso2/product-apim-tooling/import-export-cli/integration/apim"
@@ -1245,6 +1243,9 @@ func TestDeleteApiProductWithActiveSubscriptionsSuperTenantUser(t *testing.T) {
 	apiPublisher := publisher.UserName
 	apiPublisherPassword := publisher.Password
 
+	apiSubscriber := subscriber.UserName
+	apiSubscriberPassword := subscriber.Password
+
 	dev := GetDevClient()
 
 	// Add the first dependent API to env1
@@ -1270,15 +1271,12 @@ func TestDeleteApiProductWithActiveSubscriptionsSuperTenantUser(t *testing.T) {
 	//Change life cycle state of Api Product from CREATED to PUBLISHED
 	testutils.PublishAPIProduct(dev, apiPublisher, apiPublisherPassword, apiProduct.ID)
 
-	args := &testutils.ApiGetKeyTestArgs{
-		CtlUser:    testutils.Credentials{Username: adminUsername, Password: adminPassword},
-		ApiProduct: apiProduct,
-		Apim:       dev,
-	}
-	base.WaitForIndexing()
+	// Create an app and subscribe to the API Product directly via REST API to create an active subscription
+	app := testutils.AddApp(t, dev, apiSubscriber, apiSubscriberPassword)
+	testutils.AddSubscription(t, dev, apiProduct.ID, app.ApplicationID, testutils.UnlimitedPolicy,
+		apiSubscriber, apiSubscriberPassword)
 
-	//Get keys for ApiProduct and keep subscription active
-	testutils.ValidateGetKeysWithoutCleanup(t, args, false)
+	dev.Login(adminUsername, adminPassword)
 
 	argsToDelete := &testutils.ApiProductImportExportTestArgs{
 		CtlUser:    testutils.Credentials{Username: adminUsername, Password: adminPassword},

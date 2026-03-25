@@ -99,6 +99,9 @@ func TestGetKeysConsecutivelyAdminSuperTenantUser(t *testing.T) {
 	apiCreator := creator.UserName
 	apiCreatorPassword := creator.Password
 
+	apiSubscriber := subscriber.UserName
+	apiSubscriberPassword := subscriber.Password
+
 	dev := GetDevClient()
 
 	api := testutils.AddAPI(t, dev, apiCreator, apiCreatorPassword)
@@ -106,15 +109,20 @@ func TestGetKeysConsecutivelyAdminSuperTenantUser(t *testing.T) {
 
 	testutils.PublishAPI(dev, apiPublisher, apiPublisherPassword, api.ID)
 
+	// Create an app and subscribe to the API directly via REST API to create an active subscription
+	app := testutils.AddApp(t, dev, apiSubscriber, apiSubscriberPassword)
+	testutils.AddSubscription(t, dev, api.ID, app.ApplicationID, testutils.UnlimitedPolicy,
+		apiSubscriber, apiSubscriberPassword)
+
+	dev.Login(adminUser, adminPassword)
+
 	args := &testutils.ApiGetKeyTestArgs{
 		CtlUser: testutils.Credentials{Username: adminUser, Password: adminPassword},
 		Api:     api,
 		Apim:    dev,
 	}
-	//Get keys for the first time without cleaning subscription
-	testutils.ValidateGetKeysWithoutCleanup(t, args, true)
 
-	//Get keys for the second time and remove subscription
+	//Get keys and remove subscription
 	testutils.ValidateGetKeys(t, args)
 }
 

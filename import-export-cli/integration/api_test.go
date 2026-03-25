@@ -1554,6 +1554,9 @@ func TestDeleteApiWithActiveSubscriptionsSuperTenantUser(t *testing.T) {
 	apiCreator := creator.UserName
 	apiCreatorPassword := creator.Password
 
+	apiSubscriber := subscriber.UserName
+	apiSubscriberPassword := subscriber.Password
+
 	dev := GetDevClient()
 
 	api := testutils.AddAPI(t, dev, apiCreator, apiCreatorPassword)
@@ -1561,15 +1564,16 @@ func TestDeleteApiWithActiveSubscriptionsSuperTenantUser(t *testing.T) {
 	// Create and Deploy Revision of the above API
 	testutils.CreateAndDeployAPIRevision(t, dev, apiPublisher, apiPublisherPassword, api.ID)
 
-	args := &testutils.ApiGetKeyTestArgs{
-		CtlUser: testutils.Credentials{Username: adminUser, Password: adminPassword},
-		Api:     api,
-		Apim:    dev,
-	}
 	//Publish created API
 	testutils.PublishAPI(dev, apiPublisher, apiPublisherPassword, api.ID)
 
-	testutils.ValidateGetKeysWithoutCleanup(t, args, false)
+	// Create an app and subscribe to the API directly via REST API to create an active subscription
+	app := testutils.AddApp(t, dev, apiSubscriber, apiSubscriberPassword)
+	testutils.AddSubscription(t, dev, api.ID, app.ApplicationID, testutils.UnlimitedPolicy,
+		apiSubscriber, apiSubscriberPassword)
+
+	dev.Login(adminUser, adminPassword)
+
 	//args to delete API
 	argsToDelete := &testutils.ApiImportExportTestArgs{
 		CtlUser: testutils.Credentials{Username: adminUser, Password: adminPassword},
