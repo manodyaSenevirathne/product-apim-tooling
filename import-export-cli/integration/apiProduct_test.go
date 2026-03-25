@@ -1247,9 +1247,6 @@ func TestDeleteApiProductWithActiveSubscriptionsSuperTenantUser(t *testing.T) {
 	apiPublisher := publisher.UserName
 	apiPublisherPassword := publisher.Password
 
-	apiSubscriber := subscriber.UserName
-	apiSubscriberPassword := subscriber.Password
-
 	dev := GetDevClient()
 
 	// Add the first dependent API to env1
