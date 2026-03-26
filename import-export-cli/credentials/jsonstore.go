@@ -232,7 +232,7 @@ func (s *JsonStore) EraseAPIM(env string) error {
 	if !ok {
 		return fmt.Errorf("%s was not found", env)
 	}
-	if !miCredentialsExists(environment.MI) {
+	if !miCredentialsExists(environment.MI) && !defaultAppExists(environment.DefaultApp) {
 		// delete the environment
 		delete(s.credentials.Environments, env)
 	} else {
@@ -316,4 +316,8 @@ func apimCredentialsExists(apimCred Credential) bool {
 
 func mgTokenExists(mgwAdapterToken MgAdapterEnv) bool {
 	return mgwAdapterToken.AccessToken != ""
+}
+
+func defaultAppExists(app *DefaultAppKey) bool {
+	return app != nil && app.ConsumerKey != "" && app.ConsumerSecret != ""
 }
