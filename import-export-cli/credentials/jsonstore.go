@@ -224,7 +224,6 @@ func (s *JsonStore) SetDefaultAppKeys(env, consumerKey, consumerSecret string) e
 	fmt.Printf(PlainTextWarnMessage, s.Path)
 	return nil
 }
-}
 
 // EraseAPIM remove apim credentials from the store
 func (s *JsonStore) EraseAPIM(env string) error {
