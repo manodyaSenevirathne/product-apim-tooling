@@ -218,7 +218,12 @@ func (s *JsonStore) SetDefaultAppKeys(env, consumerKey, consumerSecret string) e
 		ConsumerSecret: Base64Encode(consumerSecret),
 	}
 	s.credentials.Environments[env] = environment
-	return s.persist()
+	if err := s.persist(); err != nil {
+		return err
+	}
+	fmt.Printf(PlainTextWarnMessage, s.Path)
+	return nil
+}
 }
 
 // EraseAPIM remove apim credentials from the store
