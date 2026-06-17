@@ -87,6 +87,7 @@ type APIDTODefinition struct {
 	AsyncTransportProtocols         []string      `json:"asyncTransportProtocols,omitempty" yaml:"asyncTransportProtocols,omitempty"`
 	GatewayType                     string        `json:"gatewayType,omitempty" yaml:"gatewayType,omitempty"`
 	EnableSubscriberVerification    bool          `json:"enableSubscriberVerification,omitempty" yaml:"enableSubscriberVerification,omitempty"`
+	ApiPolicies                     interface{}   `json:"apiPolicies,omitempty" yaml:"apiPolicies,omitempty"`
 }
 
 type CorsConfiguration struct {
