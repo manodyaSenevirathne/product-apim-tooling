@@ -131,10 +131,21 @@ func ImportMCPServer(accessOAuthToken, publisherEndpoint, importEnvironment, imp
 	}
 
 	if mcpServerParamsPath != "" {
-		//Reading params file of the MCP Server and add configurations into temp artifact
-		err := handleCustomizedParameters(mcpServerFilePath, mcpServerParamsPath, importEnvironment)
-		if err != nil {
-			return err
+		if dryRun {
+			// In dry-run mode the artifact is sent only to the governance compliance
+			// endpoint, which reads mcp_server.yaml at the project root. Applying the params
+			// file restructures the project into a nested SourceArchive.zip layout, hiding
+			// mcp_server.yaml from the scanner and causing a server-side error. Environment
+			// parameters are irrelevant to governance validation, so we skip the
+			// restructuring and validate the base artifact directly.
+			utils.Logln(utils.LogPrefixInfo + "Dry-run mode: skipping environment parameter " +
+				"restructuring; governance validates the base MCP Server artifact")
+		} else {
+			//Reading params file of the MCP Server and add configurations into temp artifact
+			err := handleCustomizedParameters(mcpServerFilePath, mcpServerParamsPath, importEnvironment)
+			if err != nil {
+				return err
+			}
 		}
 	}
 
