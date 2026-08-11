@@ -19,13 +19,21 @@
 package impl
 
 import (
+	"archive/zip"
+	"bytes"
+	"io"
+	"net/http"
+	"net/http/httptest"
 	"os"
+	"path/filepath"
+	"strings"
 	"testing"
 
 	v2 "github.com/wso2/product-apim-tooling/import-export-cli/specs/v2"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestExtractAPIInfoWithCorrectJSON(t *testing.T) {
@@ -92,4 +100,79 @@ func TestGetAPIInfoMalformedDirectory(t *testing.T) {
 	assert.True(t, os.IsNotExist(err), "File not found error must be thrown")
 	assert.Nil(t, api,
 		"Should return nil for malformed directories")
+}
+
+// TestImportAPI_DryRunWithParams_DoesNotRestructureProject verifies that ImportAPI
+// skips params-based project restructuring when --dry-run is set. The uploaded zip
+// is inspected via a mock server in both cases.
+func TestImportAPI_DryRunWithParams_DoesNotRestructureProject(t *testing.T) {
+	srcDir := utils.GetRelativeTestDataPathFromImpl() + "PizzaShackAPI-1.0.0"
+
+	paramsFile := filepath.Join(t.TempDir(), "api_params.yaml")
+	require.NoError(t, os.WriteFile(paramsFile, []byte(`environments:
+  - name: testenv
+    configs:
+      endpoints:
+        production:
+          url: 'https://example.com'`), 0644))
+
+	// getUploadedZipEntries calls ImportAPI against a mock server and returns
+	// the names of entries in the zip that was uploaded. Entries carry a directory
+	// prefix (e.g. "PizzaShackAPI-1.0.0/api.yaml"), so callers should match by suffix.
+	getUploadedZipEntries := func(dryRun bool) []string {
+		var uploadedZip []byte
+
+		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			_ = r.ParseMultipartForm(32 << 20)
+			if f, _, err := r.FormFile("file"); err == nil {
+				defer f.Close()
+				uploadedZip, _ = io.ReadAll(f)
+			}
+			if dryRun {
+				w.WriteHeader(http.StatusOK)
+				_, _ = w.Write([]byte(`{"compliance-check":{"result":"pass","violations":[]}}`))
+			} else {
+				w.WriteHeader(http.StatusCreated)
+			}
+		}))
+		defer srv.Close()
+
+		_ = ImportAPI("token", srv.URL, "testenv", srcDir, paramsFile,
+			false, true, false, false, false, dryRun, "table")
+
+		zr, err := zip.NewReader(bytes.NewReader(uploadedZip), int64(len(uploadedZip)))
+		if err != nil {
+			return nil
+		}
+		entries := make([]string, 0, len(zr.File))
+		for _, f := range zr.File {
+			entries = append(entries, f.Name)
+		}
+		return entries
+	}
+
+	hasEntry := func(entries []string, suffix string) bool {
+		for _, e := range entries {
+			if strings.HasSuffix(e, suffix) {
+				return true
+			}
+		}
+		return false
+	}
+
+	t.Run("without dry-run params restructures the uploaded artifact", func(t *testing.T) {
+		entries := getUploadedZipEntries(false)
+		assert.True(t, hasEntry(entries, "SourceArchive.zip"),
+			"uploaded zip must contain SourceArchive.zip, got: %v", entries)
+		assert.False(t, hasEntry(entries, "api.yaml"),
+			"api.yaml must not be at root of the uploaded zip, got: %v", entries)
+	})
+
+	t.Run("with dry-run params restructuring is skipped", func(t *testing.T) {
+		entries := getUploadedZipEntries(true)
+		assert.True(t, hasEntry(entries, "api.yaml"),
+			"api.yaml must be at root of the uploaded zip, got: %v", entries)
+		assert.False(t, hasEntry(entries, "SourceArchive.zip"),
+			"uploaded zip must not contain SourceArchive.zip, got: %v", entries)
+	})
 }
